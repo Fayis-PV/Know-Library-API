@@ -157,10 +157,10 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        # Feel free to alter this value to suit your needs.
-        default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/neondb',
-        conn_max_age=600
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         # Feel free to alter this value to suit your needs.
+#         default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/neondb',
+#         conn_max_age=600
+#     )
+# }
