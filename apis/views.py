@@ -50,9 +50,9 @@ class WebsitesListView(ListCreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            
-            image = RemoteStorage.save_image(request)
-            banners = RemoteStorage.save_banners(request)
+            remote = RemoteStorage()
+            image = remote.save_image(request=request)
+            banners = remote.save_banners(request=request)
             print(banners)
             website = serializer.save(image = image,banners=banners)
             website.add_categories(categories) 
