@@ -14,6 +14,9 @@ import json
 from django.core.serializers import serialize
 from django.http import JsonResponse
 # Create your views here.
+def index(request):
+    return render(request,'index.html')
+
 def home(request):
     return redirect('/api/auth/admin')
 
