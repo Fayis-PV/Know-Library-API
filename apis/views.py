@@ -13,9 +13,21 @@ from .custom_storage import RemoteStorage
 import json
 from django.core.serializers import serialize
 from django.http import JsonResponse
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.authtoken.models import Token
+
 # Create your views here.
 def index(request):
     return render(request,'index.html')
+
+class CustomLoginView(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        user = User.objects.get(username=request.data['username'])
+        token, created = Token.objects.get_or_create(user=user)
+        response.data['token'] = token.key
+        return response
 
 def home(request):
     return redirect('/api/auth/admin')
@@ -34,9 +46,11 @@ class WebsitesListView(ListCreateAPIView):
     
     def post(self,request):
         categories = request.data.getlist('category')
+        print(request.data)
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
+            
             image = RemoteStorage.save_image(request)
             banners = RemoteStorage.save_banners(request)
             print(banners)
@@ -51,12 +65,12 @@ class WebsitesListView(ListCreateAPIView):
 class WebsitesDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Website.objects.all()
     serializer_class = WebsiteSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get(self,request,pk):
-        serialized_data = self.serializer_class.get(self,request,pk)
-        # data = json.loads(queryset)
-        return Response(serialized_data.data)
+        serialized_data = self.serializer_class.get_data(request,pk)
+        print(serialized_data)
+        return Response(serialized_data)
     
 
 class CategoriesListView(ListCreateAPIView):
@@ -69,22 +83,25 @@ class CategoriesDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = CategorySerializer
     permission_classes = [IsAdminUser]
 
-class AdminAuthView(GenericAPIView):
-    serializer_class = AdminAuthSerializer
 
-    def post(self,request,format= None):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+# class AdminAuthView(GenericAPIView):
+#     serializer_class = AdminAuthSerializer
 
-        username = serializer.validated_data['username']
-        password = serializer.validated_data['password']
+#     def post(self,request,format= None):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         username = serializer.validated_data['username']
+#         password = serializer.validated_data['password']
         
-        user = authenticate(request,username= username,password = password)
-        if user:
-            login(request,user)
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+#         user = authenticate(request,username= username,password = password)
+#         if user:
+#             login(request,user)
+#             return Response(status=status.HTTP_200_OK)
+#         else:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class AdminPageView(APIView):
     def get(self,request):

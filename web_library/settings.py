@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,12 +34,20 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 REST_FRAMEWORK = {
-    
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-    
+        'rest_framework.authentication.SessionAuthentication',  # For session-based auth
+        'rest_framework.authentication.BasicAuthentication',  # For basic auth
+    ),
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # Set token expiration
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
+    'ALGORITHM': 'HS256',  # Change this to 'RS256' for RS256 algorithm
 }
 
 # Application definition
@@ -52,7 +61,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apis.apps.ApisConfig',
     'rest_framework',
-    'rest_framework_simplejwt',
+    'rest_framework.authtoken',  # For token authentication
+    'django.contrib.sites',  # Required for allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -67,6 +81,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'web_library.urls'
+
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+
 
 TEMPLATES = [
     {

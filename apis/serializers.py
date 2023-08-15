@@ -32,6 +32,20 @@ class WebsiteSerializer(serializers.ModelSerializer):
         data =  super().to_internal_value(instance)
         category = data.pop('category',[])
         return data
+    
+    def get_data(request,pk):
+        object = Website.objects.get(pk= pk)
+        print()
+        return {
+            "id":object.id,
+            "name":object.name,
+            "url":object.url,
+            "description":object.description,
+            "image":object.image,
+            "banners":object.banners,
+            "category":list(object.category.values_list('id',flat=True)),
+            "active":object.active,
+            }
 
 
     
@@ -40,6 +54,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
-class AdminAuthSerializer(serializers.Serializer):
+class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=200)
     password = serializers.CharField(max_length = 128,write_only = True)

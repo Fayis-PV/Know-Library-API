@@ -2,10 +2,11 @@
 
 <a href="/api/websites">websites</a>
 {% if request.user.is_authenticated %}
+<p>{{ request.user }}</p>
 <a href="/api/categories">categories</a>
-<a href="/api-auth/logout">Logout</a>
+<a href="/accounts/logout">Logout</a>
 {% else %}
 
-<a href="/api-auth/login">Login</a>
-<a href="/api-auth/signup">Sign Up</a>
+<a href="/accounts/login">Login</a>
+<a href="/accounts/signup">Sign Up</a>
 {% endif %}
