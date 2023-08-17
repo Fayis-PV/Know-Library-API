@@ -22,7 +22,6 @@ class RemoteStorage:
         headers = {
             "Authorization": f"Client-ID {RemoteStorage.IMGUR_CLIENT_ID}",
         }
-
         if isinstance(image, (UploadedFile)):
             image_data = image.read()
         elif isinstance(image, str):
@@ -56,7 +55,7 @@ class RemoteStorage:
     @staticmethod
     def save_image(request):
         image = request.data.get('image')
-        if not image:
+        if image in ('',None):
             return None
         image_link = RemoteStorage.save_img(image)
         return image_link
@@ -66,6 +65,8 @@ class RemoteStorage:
         banners = request.data.getlist('banners')
         banners_list = []
         for banner in banners:
+            if banner in ('',None):
+                return None
             banner_link = RemoteStorage.save_img(banner)
             if banner_link:
                 banners_list.append(banner_link)

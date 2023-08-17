@@ -9,7 +9,7 @@ urlpatterns = [
     path("categories", CategoriesListView.as_view(), name="categories_list"),
     path("categories/<int:pk>", CategoriesDetailView.as_view(), name="categories_detail"),
 
-    # path("auth/admin", AdminAuthView.as_view(), name="admin_login"),
+    path("auth", MyLoginView.as_view(), name="admin_login"),
     path("admin", AdminPageView.as_view(), name="admin_page")
     
 ]
