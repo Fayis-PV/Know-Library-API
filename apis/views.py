@@ -1,7 +1,7 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponseRedirect
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView,ListCreateAPIView,GenericAPIView,RetrieveUpdateDestroyAPIView,CreateAPIView
-from .serializers import *
+from .serializers import WebsiteSerializer,CategorySerializer,MyTokenObtainPairSerializer
 from .models import *
 from rest_framework.permissions import AllowAny,IsAuthenticated,IsAuthenticatedOrReadOnly
 from .permissions import IsAdminUserOrReadOnly
@@ -12,15 +12,12 @@ from rest_framework.parsers import FormParser,MultiPartParser
 from .custom_storage import RemoteStorage
 import json
 from django.core.serializers import serialize
-from django.http import JsonResponse
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authtoken.models import Token
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from allauth.account.views import LoginView
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+
 # Create your views here.
 def index(request):
     return render(request,'index.html')
@@ -30,56 +27,60 @@ def home(request):
     return render(request,'index.html')
 
 
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['name'] = user.username
-        return token
-    
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if response.status_code == 200:
-            refresh_token = response.data['refresh']
-            response.set_cookie('refresh_token', refresh_token, httponly=True)
-        return response
-    
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
-class MyLoginView(GenericAPIView):
-    serializer_class = MyTokenObtainPairSerializer
 
+class SetTokenView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
-            user = self.request.user
-            refresh = RefreshToken.for_user(user)  # Generate a new refresh token
+            user = request.user
+
+            # Create and set the JWT token
+            refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
-            
-            # Set the refresh token as a cookie
-            response = redirect('/')
-            response.set_cookie('refresh_token', str(refresh), httponly=True)
-            
-            return response
+
+            session_key = f'user_{user.id}'
+            expire_date = timezone.now() + refresh.access_token.lifetime
+
+
+            # Update or create user session
+            try:
+                user_session = Session.objects.get(session_key=session_key)
+                user_session.expire_date = timezone.now() + refresh.access_token.lifetime
+
+                user_session.save()
+            except Session.DoesNotExist:
+                user_session = Session.objects.create(session_key=session_key,expire_date=expire_date)
+                user_session.save()
+
+            # Set the refresh token as a secure HTTP-only cookie
+            response = Response(status=status.HTTP_200_OK)
+            response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True)
+
+            # Set user session ID as a cookie for tracking
+            response.set_cookie('user_session_id', user_session.session_key)
+
+            return redirect('/')
         else:
-            return redirect('/accounts/login')
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
          
 class WebsitesListView(ListCreateAPIView):
     queryset = Website.objects.all()
     serializer_class = WebsiteSerializer
-    # parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    authentication_classes = [JWTAuthentication]
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = []
 
     def get(self,request):
+        print(self.request.user)
         queryset = Website.objects.all()
         serialized_data = serialize('json', queryset)
         data = json.loads(serialized_data)
         return Response(data)
     
     def post(self,request):
-        print(request.data)
+        print(request.user)
         categories = request.data.getlist('category')
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)

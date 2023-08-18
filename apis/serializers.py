@@ -5,6 +5,8 @@ from django.core.files.base import ContentFile
 from django.core.files import File
 from urllib.request import urlopen
 from io import BytesIO
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 # Create Serializers here
 
@@ -57,3 +59,11 @@ class CategorySerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=200)
     password = serializers.CharField(max_length = 128,write_only = True)
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['name'] = user.username
+        return token

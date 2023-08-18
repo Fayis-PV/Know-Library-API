@@ -18,7 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from apis.views import index,CustomTokenObtainPairView
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView,TokenVerifyView
 from allauth.account.views import ConfirmEmailView, PasswordChangeView
 
 
@@ -26,14 +26,11 @@ urlpatterns = [
     # API token endpoints (djangorestframework-simplejwt)
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),  # Verify JWT token
     # User registration and email confirmation (allauth)
     path('accounts/', include('allauth.urls')),
     
     path('',index,name='index'),
     path('admin/', admin.site.urls),
     path('api/',include('apis.urls')),
-    path('api-auth/',include('rest_framework.urls')),
-
-    # path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
