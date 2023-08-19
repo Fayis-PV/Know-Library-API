@@ -99,6 +99,38 @@ class TestAuthView(APITestCase):
         self.assertEqual(response.status_code,status.HTTP_204_NO_CONTENT)
 
 
+    def test_categories_list_create_view(self):
+        data = {'name':'Category 2'}
+
+        access_token = str(self.refresh.access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        response = self.client.post(reverse('categories_list'),data=data,format = 'json')
+        self.assertEqual(response.status_code,status.HTTP_201_CREATED)
+
+    
+    def test_categories_detail_update_view(self):
+        category1 = Category.objects.create(name='Category 1')
+
+        data = {'name':'Category 2'}
+
+        access_token = str(self.refresh.access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        response = self.client.put(reverse('categories_detail',args=[category1.id]),data=data,format='json')
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+
+
+    def test_categories_detail_delete_view(self):
+        category1 = Category.objects.create(name='Category 1')
+
+        access_token = str(self.refresh.access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        response = self.client.delete(reverse('categories_detail',args=[category1.id]),format='json')
+        self.assertEqual(response.status_code,status.HTTP_204_NO_CONTENT)
+
+
     def test_website_create_unauthenticated(self):
         category1 = Category.objects.create(name='Category 1')
         category2 = Category.objects.create(name='Category 2')
@@ -144,3 +176,25 @@ class TestAuthView(APITestCase):
         response = self.client.delete(reverse('websites_detail',args=[website1.id]),format = 'json',)
         self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
 
+
+    def test_categories_list_create_unauthorized_view(self):
+        data = {'name':'Category 2'}
+
+        response = self.client.post(reverse('categories_list'),data=data,format = 'json')
+        self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
+
+    
+    def test_categories_detail_update_unauthorized_view(self):
+        category1 = Category.objects.create(name='Category 1')
+
+        data = {'name':'Category 2'}
+
+        response = self.client.put(reverse('categories_detail',args=[category1.id]),data=data,format='json')
+        self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
+
+
+    def test_categories_detail_delete_unauthorized_view(self):
+        category1 = Category.objects.create(name='Category 1')
+
+        response = self.client.delete(reverse('categories_detail',args=[category1.id]),format='json')
+        self.assertEqual(response.status_code,status.HTTP_401_UNAUTHORIZED)
