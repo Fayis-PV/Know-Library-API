@@ -33,22 +33,25 @@ class Website(models.Model):
         - categories: List of categories to be added.
         """
         for category in categories:
-            print(category)
             category = Category.objects.get(id = category)
             self.category.add(category)
 
-    def save_data(self):
-        # Call the original save method to save the instance
-        super(Website, self).save()
         
-        def to_json(self):
-            image_str = str(self.image) if self.image else None
-            banners_str = [str(banner) for banner in self.banners] if self.banners else []
-            categories_list = [str(category) for category in self.category.all()] if self.category.exists() else []
-             
-            data_dict =    f"'id': '{self.id}','name': '{self.name}','description': '{self.description}','url': '{self.url}','image': '{image_str}','banners': '{banners_str}','categories': '{categories_list}','active': '{self.active}'"
-            print(data_dict)
+    def to_json(self):
+        image_str = str(self.image) if self.image else None
+        banners_str = json.loads(self.banners) if self.banners else []
+        categories_list = [str(category) for category in self.category.all()] if self.category.exists() else []
 
-            json_data = json.dumps(data_dict)
-            return json_data
-        return to_json(self)
+        data_dict = {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'url': self.url,
+            'image': image_str,
+            'banners': banners_str,
+            'categories': categories_list,
+            'active': self.active
+        }
+
+        json_data = json.dumps(data_dict)
+        return json_data

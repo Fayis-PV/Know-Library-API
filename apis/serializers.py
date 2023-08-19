@@ -37,7 +37,6 @@ class WebsiteSerializer(serializers.ModelSerializer):
     
     def get_data(request,pk):
         object = Website.objects.get(pk= pk)
-        print()
         return {
             "id":object.id,
             "name":object.name,

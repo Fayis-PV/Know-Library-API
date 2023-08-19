@@ -1,6 +1,6 @@
 from django.test import TestCase,Client
 from .views import *
-from django.urls import reverse,resolve
+from django.urls import reverse
 from .models import Website,Category
 from rest_framework.test import APITestCase,APIClient
 from django.contrib.auth.models import User

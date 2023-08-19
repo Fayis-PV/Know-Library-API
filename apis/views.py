@@ -88,7 +88,7 @@ class WebsitesListView(ListCreateAPIView):
             banners = remote.save_banners(request=request)
             website = serializer.save(image = image,banners=banners)
             website.add_categories(categories) 
-            website = website.save_data()
+            website = website.to_json()
             if website:
                 return Response(website ,status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
