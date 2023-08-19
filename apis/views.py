@@ -59,7 +59,7 @@ class SetTokenView(APIView):
             response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True)
 
             # Set user session ID as a cookie for tracking
-            response.set_cookie('user_session_id', user_session.session_key)
+            response.set_cookie('user_session_id', user_session.session_key,secure=True,httponly=True)
 
             return redirect('/')
         else:
@@ -70,17 +70,15 @@ class WebsitesListView(ListCreateAPIView):
     queryset = Website.objects.all()
     serializer_class = WebsiteSerializer
     parser_classes = [MultiPartParser, FormParser]
-    permission_classes = []
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
-        print(self.request.user)
         queryset = Website.objects.all()
         serialized_data = serialize('json', queryset)
         data = json.loads(serialized_data)
         return Response(data)
     
     def post(self,request):
-        print(request.user)
         categories = request.data.getlist('category')
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -103,7 +101,6 @@ class WebsitesDetailView(RetrieveUpdateDestroyAPIView):
 
     def get(self,request,pk):
         serialized_data = self.serializer_class.get_data(request,pk)
-        print(serialized_data)
         return Response(serialized_data)
     
 
