@@ -38,8 +38,9 @@ class Website(models.Model):
 
         
     def to_json(self):
+        super(Website, self).save()
         image_str = str(self.image) if self.image else None
-        banners_str = json.loads(self.banners) if self.banners else []
+        banners_str = [str(banner) for banner in self.banners] if self.banners else []
         categories_list = [str(category) for category in self.category.all()] if self.category.exists() else []
 
         data_dict = {

@@ -1,55 +1,18 @@
 from rest_framework import serializers
-from .models import *
-from django.contrib.auth.models import User
-from django.core.files.base import ContentFile
-from django.core.files import File
-from urllib.request import urlopen
-from io import BytesIO
+from .models import Website,Category
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from .fields import ImageUrlField
 
 # Create Serializers here
 
-
-class ImageUrlField(serializers.FileField):
-    def to_internal_value(self, data): 
-        if data is None:
-            return None 
-        elif not isinstance(data,File):
-            return data
-        return super().to_internal_value(data)
-
-
 class WebsiteSerializer(serializers.ModelSerializer):
-    image = ImageUrlField(allow_null = True)
+    image = ImageUrlField(allow_null = True,)
     banners = ImageUrlField(allow_null = True)
     class Meta:
         model = Website
         fields = ['id','name','description','url','image','banners','category','active']
 
-    def validate_image(self,value):
-        return value
 
-    def to_internal_value(self, instance):
-        data =  super().to_internal_value(instance)
-        category = data.pop('category',[])
-        return data
-    
-    def get_data(request,pk):
-        object = Website.objects.get(pk= pk)
-        return {
-            "id":object.id,
-            "name":object.name,
-            "url":object.url,
-            "description":object.description,
-            "image":object.image,
-            "banners":object.banners,
-            "category":list(object.category.values_list('id',flat=True)),
-            "active":object.active,
-            }
-
-
-    
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

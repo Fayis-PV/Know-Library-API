@@ -22,14 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$%&&v1u-ai2+d6kyv=zl3jv-p9ay!d^1@8!)3nm7344l%se%0s'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = '/api/set_token'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 
@@ -39,12 +39,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     # It will work instead of the default serializer(TokenObtainPairSerializer).
-    "TOKEN_OBTAIN_SERIALIZER": "apis.views.MyTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "apis.serializers.MyTokenObtainPairSerializer",
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Adjust as needed
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes = 1),  # Adjust as needed
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # Adjust as needed
+    'REFRESH_TOKEN_LIFETIME': timedelta(days = 90),  # Adjust as needed
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=7),
     'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),
@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    "corsheaders",
+
 
 ]
 
@@ -84,6 +86,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -174,6 +177,7 @@ STATIC_ROOT = os.path.join(BASE_DIR/'static_root')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FILE_STORAGE = 'apis.custom_storage.RemoteStorage' 
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Setup for Render Dedloyment

@@ -1,22 +1,23 @@
+import json
+from .custom_storage import RemoteStorage
 from django.shortcuts import render,redirect,HttpResponseRedirect
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView,ListCreateAPIView,GenericAPIView,RetrieveUpdateDestroyAPIView,CreateAPIView
 from .serializers import WebsiteSerializer,CategorySerializer,MyTokenObtainPairSerializer
-from .models import *
-from rest_framework.permissions import AllowAny,IsAuthenticated,IsAuthenticatedOrReadOnly
+from .models import Website,Category
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 from .permissions import IsAdminUserOrReadOnly
-from rest_framework.response import Response
-from django.contrib.auth import login,logout,authenticate
 from rest_framework import status
+from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView,CreateAPIView
+from rest_framework.response import Response
 from rest_framework.parsers import FormParser,MultiPartParser
-from .custom_storage import RemoteStorage
-import json
 from django.core.serializers import serialize
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.sessions.models import Session
 from django.utils import timezone
+import jwt
+from allauth.account.views import LogoutView,LoginView
 
 # Create your views here.
 def index(request):
@@ -31,40 +32,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class SetTokenView(APIView):
-    def get(self, request):
-        if request.user.is_authenticated:
-            user = request.user
-
-            # Create and set the JWT token
-            refresh = RefreshToken.for_user(user)
-            access_token = refresh.access_token
-
-            session_key = f'user_{user.id}'
-            expire_date = timezone.now() + refresh.access_token.lifetime
-
-
-            # Update or create user session
-            try:
-                user_session = Session.objects.get(session_key=session_key)
-                user_session.expire_date = timezone.now() + refresh.access_token.lifetime
-
-                user_session.save()
-            except Session.DoesNotExist:
-                user_session = Session.objects.create(session_key=session_key,expire_date=expire_date)
-                user_session.save()
-
-            # Set the refresh token as a secure HTTP-only cookie
-            response = Response(status=status.HTTP_200_OK)
-            response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True)
-
-            # Set user session ID as a cookie for tracking
-            response.set_cookie('user_session_id', user_session.session_key,secure=True,httponly=True)
-
-            return redirect('/')
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
          
 class WebsitesListView(ListCreateAPIView):
     queryset = Website.objects.all()
@@ -73,6 +40,7 @@ class WebsitesListView(ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self,request):
+        print(self.request.COOKIES.values())
         queryset = Website.objects.all()
         serialized_data = serialize('json', queryset)
         data = json.loads(serialized_data)
@@ -122,3 +90,40 @@ class AdminPageView(APIView):
         websites = Website.objects.all().order_by('-added_on')
         categories = Category.objects.all().order_by('name')
         return Response({'Websites':{websites},'Categories':{categories}})
+
+
+class CustomLoginView(LoginView):
+    def get(self,request):
+        return render(request,'account/login.html')
+    
+    def form_valid(self, form):
+        # Call the parent class's form_valid to complete the login process
+        response = super().form_valid(form)
+        
+        # Generate and set JWT token as a cookie
+        if form.user:
+            user = form.user
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+            
+            response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True, samesite='Lax')
+
+            return response
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    
+
+
+class CustomLogoutView(LogoutView):
+    def get(self,request):
+        return render(request,'account/logout.html')
+    
+    def post(self, *args, **kwargs):
+        response = super().post(*args, **kwargs)
+
+        # Delete the 'refresh_token' and 'user_session_id' cookies
+        response.delete_cookie('refresh_token')
+        response.delete_cookie('user_session_id')
+
+        return response
