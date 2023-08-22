@@ -8,7 +8,7 @@ defusedxml==0.7.1
 dj-database-url==2.0.0
 Django==3.2.20
 django-allauth==0.54.0
-django-cors-headers==4.2.0
+django-cors-headers==4.1.0
 django-filter==23.2
 django-rest-auth==0.9.5
 django-rest-authtoken==2.1.4
