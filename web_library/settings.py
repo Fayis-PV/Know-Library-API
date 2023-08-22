@@ -203,7 +203,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 DATABASES = {
     'default': dj_database_url.config(
         # Feel free to alter this value to suit your needs.
-        default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/neondb',
+        default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/knowlibrary',
         conn_max_age=600
     )
 }
