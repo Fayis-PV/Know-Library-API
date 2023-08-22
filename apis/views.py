@@ -1,10 +1,10 @@
 import json
 from .custom_storage import RemoteStorage
-from django.shortcuts import render,redirect,HttpResponseRedirect
+from django.shortcuts import render,redirect
 from rest_framework.views import APIView
 from .serializers import WebsiteSerializer,CategorySerializer,MyTokenObtainPairSerializer
 from .models import Website,Category
-from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,IsAdminUser
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView,CreateAPIView
@@ -17,9 +17,18 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 import jwt
-from allauth.account.views import LogoutView,LoginView
+from allauth.account.views import LogoutView,LoginView,SignupView,ConfirmEmailView
+from allauth.account.models import EmailAddress
+from django.contrib.auth.models import User
+from django.conf import settings
+from allauth.account.utils import send_email_confirmation
+from django.contrib import messages
+from django.views import View
+from django import template
+from django.urls import reverse
 
 # Create your views here.
+
 def index(request):
     return render(request,'index.html')
 
@@ -85,11 +94,47 @@ class CategoriesDetailView(RetrieveUpdateDestroyAPIView):
 
 
 class AdminPageView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     def get(self,request):
-        websites = Website.objects.all().order_by('-added_on')
-        categories = Category.objects.all().order_by('name')
-        return Response({'Websites':{websites},'Categories':{categories}})
+        token = self.request.COOKIES.get('refresh_token')
+        try:
+            # Decode the JWT token's payload
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            
+            # Extract the user's unique identifier
+            user_id = payload.get('user_id')
+            
+            # Query the user database to retrieve the user
+            user = User.objects.get(id=user_id)
+            
+            websites = Website.objects.all().order_by('-added_on')
+            categories = Category.objects.all().order_by('name')
+            return Response({'User':user.username,
+                             'Websites':{websites.first().name},
+                             'Categories':{categories.first().name} })
+        
+        except jwt.ExpiredSignatureError:
+            # Handle token expiration
+            return None
+        except jwt.DecodeError:
+            # Handle invalid token
+            return None
+        except User.DoesNotExist:
+            # Handle user not found
+            return None
+        
+
+class CustomSignupView(SignupView):
+    def get(self,request):
+        return render(request,'account/signup.html')
+    
+    def form_valid(self, form):
+        
+        # Do your custom processing here
+        # For example, you can create the user account
+        
+        # Redirect to the login page after signup
+        return redirect('account_login') 
 
 
 class CustomLoginView(LoginView):
@@ -101,16 +146,13 @@ class CustomLoginView(LoginView):
         response = super().form_valid(form)
         
         # Generate and set JWT token as a cookie
-        if form.user:
-            user = form.user
-            refresh = RefreshToken.for_user(user)
-            access_token = refresh.access_token
-            
-            response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True, samesite='Lax')
+        user = form.user
+        refresh = MyTokenObtainPairSerializer.get_token(user)
+        access_token = refresh.access_token
+        
+        response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True, samesite='Lax')
 
-            return response
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return response
 
     
 
@@ -127,3 +169,5 @@ class CustomLogoutView(LogoutView):
         response.delete_cookie('user_session_id')
 
         return response
+    
+

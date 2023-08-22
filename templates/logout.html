@@ -6,7 +6,7 @@
 <body>
     <h1>Logout</h1>
     <p>Click the button below to log out:</p>
-    <form method="post">
+    <form method="post" action="/api/logout">
         {% csrf_token %}
         <button type="submit">Logout</button>
     </form>

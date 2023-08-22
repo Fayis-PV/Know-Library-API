@@ -25,13 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -70,7 +73,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apis.apps.ApisConfig',
     'rest_framework',
-    # 'rest_framework.authtoken',  # For token authentication
     'django.contrib.sites',  # Required for allauth
     'allauth',
     'allauth.account',
@@ -127,12 +129,12 @@ WSGI_APPLICATION = 'web_library.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -198,10 +200,10 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         # Feel free to alter this value to suit your needs.
-#         default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/neondb',
-#         conn_max_age=600
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        # Feel free to alter this value to suit your needs.
+        default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/neondb',
+        conn_max_age=600
+    )
+}

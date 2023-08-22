@@ -4,7 +4,7 @@
 {% if request.user.is_authenticated %}
 <p>{{ request.user }}</p>
 <a href="/api/categories">categories</a>
-<a href="/api/logout">Logout</a>
+<a href="/accounts/logout">Logout</a>
 {% else %}
 
 <a href="/accounts/login">Login</a>

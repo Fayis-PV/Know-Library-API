@@ -9,4 +9,16 @@
 
     <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification e-mail in your main inbox, check your spam folder. Please contact us if you do not receive the verification e-mail within a few minutes.{% endblocktrans %}</p>
 
+    {% if not is_email_verified %}
+    <p>A verification code has been sent to your email. Please check your inbox and spam folder.</p>
+    <form method="post" action="{% url 'resend_verification' %}">
+      {% csrf_token %}
+      <button type="submit">Resend Verification Code</button>
+    </form>
+  {% endif %}
+  {% if email %}
+    <p>You are logged in with the email: {{ email }}</p>
+  {% else %}
+    <p>You are not logged in.</p>
+  {% endif %}
 {% endblock %}
