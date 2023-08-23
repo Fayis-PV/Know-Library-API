@@ -206,6 +206,6 @@ DATABASES = {
         'ENGINE': os.environ.get('DATABASE_URL'),
         'NAME': os.environ.get('NAME'),
         'USER': os.environ.get('USER'),
-        'PASSWORD': 'BsSUNCF6u7rb',
+        'PASSWORD': 'BsSUNCF6u7rb', 
     })
 }
