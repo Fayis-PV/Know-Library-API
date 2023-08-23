@@ -201,9 +201,11 @@ if RENDER_EXTERNAL_HOSTNAME:
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
+    'default': dj_database_url.config({
         # Feel free to alter this value to suit your needs.
-        default='postgres://fayispvchelari:fig52sMFSpQx@ep-falling-bird-27159964.us-east-2.aws.neon.tech/knowlibrary',
-        conn_max_age=600
-    )
+        'ENGINE': os.environ.get('DATABASE_URL'),
+        'NAME': os.environ.get('NAME'),
+        'USER': os.environ.get('USER'),
+        'PASSWORD': os.environ.get('PASSWORD'),
+    })
 }
