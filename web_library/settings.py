@@ -213,9 +213,9 @@ DATABASES = {
 DATABASES = {
   'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'knowlibrary',
-    'USER': 'fayispvchelari',
-    'PASSWORD': 'BsSUNCF6u7rb',
+    'NAME': os.environ.get('NAME'),
+    'USER': os.environ.get('USER'),
+    'PASSWORD': os.environ.get('PASSWORD'),
     'HOST': 'ep-falling-bird-27159964.us-east-2.aws.neon.tech',
     'PORT': '5432',
   }
