@@ -218,6 +218,9 @@ DATABASES = {
     'PASSWORD': os.environ.get('PASSWORD'),
     'HOST': 'ep-falling-bird-27159964.us-east-2.aws.neon.tech',
     'PORT': '5432',
+    'OPTIONS': {
+            'sslmode': 'require',
+        },
   }
 }
 
