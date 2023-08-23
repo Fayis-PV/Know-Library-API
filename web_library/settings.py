@@ -191,7 +191,7 @@ import dj_database_url
 
 SECRET_KEY = os.environ.get('SECRET_KEY', default='ferergg4334etfwdfewr3344')
 
-DEBUG = 'RENDER' not in os.environ
+# DEBUG = 'RENDER' not in os.environ
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -206,6 +206,6 @@ DATABASES = {
         'ENGINE': os.environ.get('DATABASE_URL'),
         'NAME': os.environ.get('NAME'),
         'USER': os.environ.get('USER'),
-        'PASSWORD': os.environ.get('PASSWORD'),
+        'PASSWORD': 'BsSUNCF6u7rb',
     })
 }
