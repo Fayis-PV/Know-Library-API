@@ -200,12 +200,11 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+
 DATABASES = {
-    'default': dj_database_url.config({
-        # Feel free to alter this value to suit your needs.
-        'ENGINE': os.environ.get('DATABASE_URL'),
-        'NAME': os.environ.get('NAME'),
-        'USER': os.environ.get('USER'),
-        'PASSWORD': 'BsSUNCF6u7rb', 
-    })
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        engine='django.db.backends.postgresql'  # You should set the correct database engine
+    )
 }
+
