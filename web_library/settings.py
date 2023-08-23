@@ -199,16 +199,16 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'postgres://fayispvchelari@ep-falling-bird-27159964.us-east-2.aws.neon.tech/knowlibrary',
-        'NAME': 'knowlibrary',
-        'USER': 'fayispvchelari',
-        'PASSWORD': 'BsSUNCF6u7rb',
-        # 'HOST': 'your_database_host',  # This could be 'localhost' or your IP address
-        # 'PORT': '5432',  # The default PostgreSQL port
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'postgres://fayispvchelari@ep-falling-bird-27159964.us-east-2.aws.neon.tech/knowlibrary',
+#         'NAME': 'knowlibrary',
+#         'USER': 'fayispvchelari',
+#         'PASSWORD': 'BsSUNCF6u7rb',
+#         # 'HOST': 'your_database_host',  # This could be 'localhost' or your IP address
+#         # 'PORT': '5432',  # The default PostgreSQL port
+#     }
+# }
 
 DATABASES = {
   'default': {

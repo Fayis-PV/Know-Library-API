@@ -129,12 +129,13 @@ class CustomSignupView(SignupView):
         return render(request,'account/signup.html')
     
     def form_valid(self, form):
-        
-        # Do your custom processing here
-        # For example, you can create the user account
-        
-        # Redirect to the login page after signup
-        return redirect('account_login') 
+        # Create the user but don't log them in
+        self.user = form.save(self.request)
+        return redirect("account_login")  # Redirect to the login page
+
+    # Optional: Override the success url to redirect after email confirmation
+    def get_success_url(self):
+        return reverse("account_login")  # Redirect to the login page
 
 
 class CustomLoginView(LoginView):
@@ -150,7 +151,7 @@ class CustomLoginView(LoginView):
         refresh = MyTokenObtainPairSerializer.get_token(user)
         access_token = refresh.access_token
         
-        response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True, samesite='Lax')
+        response.set_cookie('refresh_token', str(refresh), httponly=True, secure=True)
 
         return response
 
